@@ -1,0 +1,387 @@
+{% extends "base.html" %}
+{% load wagtailcore_tags wagtailimages_tags %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <h1 class="section-title">{{ page.title }}</h1>
+        {% if page.intro %}
+        <div class="section-subtitle">
+            {{ page.intro|richtext }}
+        </div>
+        {% endif %}
+
+        <!-- Projects Grid -->
+        <div class="projects-grid">
+            {% for project in page.get_projects %}
+            <a href="{% pageurl project %}" class="project-card">
+                {% if project.thumbnail %}
+                <div class="project-image">
+                    {% image project.thumbnail fill-600x400 %}
+                </div>
+                {% endif %}
+                <div class="project-content">
+                    <h3 class="project-title">{{ project.title }}</h3>
+                    <p class="project-summary">{{ project.summary }}</p>
+                    {% if project.technologies %}
+                    <div class="project-tech">
+                        {% for tech in project.tech_list %}
+                        <span class="tech-tag">{{ tech }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    <span class="view-project">View Details <i class="fas fa-arrow-right"></i></span>
+                </div>
+            </a>
+            {% empty %}
+            <p>Projects coming soon.</p>
+            {% endfor %}
+        </div>
+
+        <!-- Certifications -->
+        {% if page.get_certifications %}
+        <h2 class="section-title" id="certifications" style="margin-top: 4rem; scroll-margin-top: 6rem;">Certifications</h2>
+        <div class="certs-grid">
+            {% for cert in page.get_certifications %}
+            <div class="cert-card">
+                {% if cert.badge_image %}
+                <div class="cert-badge">
+                    {% image cert.badge_image fill-100x100 %}
+                </div>
+                {% endif %}
+                <div class="cert-info">
+                    <h4 class="cert-name">{{ cert.name }}</h4>
+                    <p class="cert-issuer">{{ cert.issuer }}</p>
+                    {% if cert.date_obtained %}
+                    <p class="cert-date">{{ cert.date_obtained }}</p>
+                    {% endif %}
+                    {% if cert.credential_url %}
+                    <a href="{{ cert.credential_url }}" target="_blank" rel="noopener" class="cert-link">
+                        <i class="fas fa-external-link-alt"></i> Verify
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+{% block extra_css %}
+<style>
+.tag-filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: var(--dark-lighter);
+    border-radius: 8px;
+}
+
+.filter-label {
+    color: var(--gray-500);
+    margin-right: 0.5rem;
+}
+
+.filter-tag {
+    padding: 0.5rem 1rem;
+    background: var(--gray-800);
+    color: var(--gray-400);
+    border-radius: 20px;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+}
+
+.filter-tag:hover, .filter-tag.active {
+    background: var(--primary);
+    color: var(--white);
+}
+
+.projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 2rem;
+}
+
+.project-card {
+    background: var(--dark-lighter);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--gray-800);
+    transition: all 0.3s;
+}
+
+.project-card {
+    text-decoration: none;
+    display: block;
+}
+
+.project-card:hover {
+    border-color: var(--primary);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-xl);
+}
+
+.project-summary {
+    color: var(--gray-400);
+    margin-bottom: 1rem;
+    line-height: 1.7;
+}
+
+.view-project {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--primary-light);
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-top: 0.5rem;
+}
+
+.project-card:hover .view-project {
+    color: var(--white);
+}
+
+.project-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.project-content {
+    padding: 1.5rem;
+}
+
+.project-title {
+    color: var(--white);
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.project-company {
+    color: var(--primary-light);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.project-description {
+    color: var(--gray-400);
+    margin-bottom: 1rem;
+    line-height: 1.7;
+}
+
+.project-tech {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.tech-tag {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    background: var(--gray-800);
+    color: var(--accent);
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.project-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.project-tag {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    background: var(--primary);
+    background: rgba(14, 165, 233, 0.2);
+    color: var(--primary-light);
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.project-tag:hover {
+    background: var(--primary);
+    color: var(--white);
+}
+
+.code-toggle {
+    margin-bottom: 1rem;
+}
+
+.btn-code {
+    background: var(--gray-800);
+    color: var(--gray-400);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+}
+
+.btn-code:hover {
+    background: var(--gray-700);
+    color: var(--white);
+}
+
+.code-block {
+    background: #1a1a2e;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+}
+
+.code-block.hidden {
+    display: none;
+}
+
+.code-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background: rgba(0,0,0,0.3);
+    border-bottom: 1px solid var(--gray-800);
+}
+
+.code-lang {
+    color: var(--primary-light);
+    font-size: 0.75rem;
+    font-family: 'JetBrains Mono', monospace;
+    text-transform: uppercase;
+}
+
+.copy-btn {
+    background: none;
+    border: none;
+    color: var(--gray-500);
+    cursor: pointer;
+    font-size: 0.75rem;
+    transition: color 0.2s;
+}
+
+.copy-btn:hover {
+    color: var(--white);
+}
+
+.code-block pre {
+    margin: 0;
+    padding: 1rem;
+    overflow-x: auto;
+}
+
+.code-block code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--gray-300);
+    white-space: pre;
+}
+
+.project-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--gray-400);
+    font-size: 0.9rem;
+    transition: color 0.2s;
+}
+
+.project-link:hover {
+    color: var(--primary-light);
+}
+
+/* Certifications */
+.certs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.cert-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--dark-lighter);
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid var(--gray-800);
+    transition: all 0.2s;
+}
+
+.cert-card:hover {
+    border-color: var(--accent);
+}
+
+.cert-badge img {
+    border-radius: 8px;
+}
+
+.cert-name {
+    color: var(--white);
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.cert-issuer {
+    color: var(--gray-500);
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+}
+
+.cert-date {
+    color: var(--gray-600);
+    font-size: 0.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.cert-link {
+    color: var(--accent);
+    font-size: 0.8rem;
+}
+
+@media (max-width: 768px) {
+    .projects-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .tag-filter {
+        justify-content: center;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleCode(btn) {
+    const card = btn.closest('.project-card');
+    const codeBlock = card.querySelector('.code-block');
+    codeBlock.classList.toggle('hidden');
+    btn.innerHTML = codeBlock.classList.contains('hidden')
+        ? '<i class="fas fa-code"></i> View Code'
+        : '<i class="fas fa-times"></i> Hide Code';
+}
+
+function copyCode(btn) {
+    const codeBlock = btn.closest('.code-block');
+    const code = codeBlock.querySelector('code').textContent;
+    navigator.clipboard.writeText(code).then(() => {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+        }, 2000);
+    });
+}
+</script>
+{% endblock %}
+{% endblock %}

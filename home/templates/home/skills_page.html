@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+{% load wagtailcore_tags %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <h1 class="section-title">{{ page.title }}</h1>
+        {% if page.intro %}
+        <div class="section-subtitle">
+            {{ page.intro|richtext }}
+        </div>
+        {% endif %}
+
+        <div class="skills-container">
+            {% for category_name, entries in page.get_skills_by_category.items %}
+            <div class="skill-category">
+                <h2 class="category-title">{{ category_name }}</h2>
+                <div class="skills-list">
+                    {% for entry in entries %}
+                    <details class="skill-item">
+                        <summary class="skill-header">
+                            {% if entry.skill.icon %}
+                            <i class="fa {{ entry.skill.icon }} skill-icon" aria-hidden="true"></i>
+                            {% endif %}
+                            <span class="skill-name">{{ entry.skill.name }}</span>
+                            <span class="skill-count">
+                                {% if entry.projects %}
+                                {{ entry.projects|length }} project{{ entry.projects|pluralize }}
+                                {% else %}
+                                {{ entry.jobs|length }} role{{ entry.jobs|pluralize }}
+                                {% endif %}
+                            </span>
+                            <i class="fa fa-chevron-down skill-chevron" aria-hidden="true"></i>
+                        </summary>
+                        <div class="skill-links">
+                            {% for project in entry.projects %}
+                            <a class="skill-link" href="{{ project.url }}">
+                                <span class="skill-link-title">{{ project.title }}</span>
+                                <span class="skill-link-meta">{{ project.summary }}</span>
+                            </a>
+                            {% empty %}
+                            {% for item in entry.jobs %}
+                            <a class="skill-link" href="{{ item.url }}">
+                                <span class="skill-link-title">{{ item.job.title }}, {{ item.job.company }}</span>
+                                <span class="skill-link-meta">{{ item.job.date_range }}</span>
+                            </a>
+                            {% empty %}
+                            <p class="skill-empty">Write-up in progress.</p>
+                            {% endfor %}
+                            {% endfor %}
+                        </div>
+                    </details>
+                    {% endfor %}
+                </div>
+            </div>
+            {% empty %}
+            <p>Skills coming soon.</p>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+{% block extra_css %}
+<style>
+.skills-container {
+    display: grid;
+    gap: 3rem;
+}
+
+.skill-category {
+    background: var(--dark-lighter);
+    border-radius: 12px;
+    padding: 2rem;
+    border: 1px solid var(--gray-800);
+}
+
+.category-title {
+    color: var(--primary-light);
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--gray-800);
+}
+
+.skills-list {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.skill-item {
+    border: 1px solid var(--gray-800);
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.15);
+}
+
+.skill-item[open] {
+    border-color: var(--primary-dark);
+}
+
+.skill-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+    cursor: pointer;
+    list-style: none;
+    min-width: 0;
+}
+
+/* Hide the native disclosure triangle; the chevron replaces it. */
+.skill-header::-webkit-details-marker {
+    display: none;
+}
+
+.skill-header:hover .skill-name {
+    color: var(--primary-light);
+}
+
+.skill-header:focus-visible {
+    outline: 2px solid var(--primary-light);
+    outline-offset: -2px;
+    border-radius: 8px;
+}
+
+.skill-icon {
+    color: var(--primary-light);
+    font-size: 1.1rem;
+    width: 24px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.skill-name {
+    flex: 1;
+    min-width: 0;
+    color: var(--white);
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.skill-count {
+    color: var(--gray-400);
+    font-size: 0.8rem;
+    font-family: 'JetBrains Mono', monospace;
+    white-space: nowrap;
+}
+
+.skill-chevron {
+    color: var(--gray-400);
+    font-size: 0.75rem;
+    transition: transform 0.2s;
+    flex-shrink: 0;
+}
+
+.skill-item[open] .skill-chevron {
+    transform: rotate(180deg);
+}
+
+.skill-links {
+    display: grid;
+    gap: 0.5rem;
+    padding: 0 1rem 1rem;
+}
+
+.skill-link {
+    display: grid;
+    gap: 0.15rem;
+    padding: 0.7rem 0.9rem;
+    border-radius: 6px;
+    background: var(--dark);
+    border: 1px solid var(--gray-800);
+    text-decoration: none;
+    transition: border-color 0.2s, transform 0.2s;
+}
+
+.skill-link:hover {
+    border-color: var(--primary);
+    transform: translateX(3px);
+}
+
+.skill-link-title {
+    color: var(--primary-light);
+    font-weight: 500;
+}
+
+.skill-link-meta {
+    color: var(--gray-400);
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+
+.skill-empty {
+    color: var(--gray-400);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .skill-chevron,
+    .skill-link {
+        transition: none;
+    }
+
+    .skill-link:hover {
+        transform: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .skill-category {
+        padding: 1.5rem;
+    }
+
+    .skill-count {
+        font-size: 0.7rem;
+    }
+}
+</style>
+{% endblock %}
+{% endblock %}

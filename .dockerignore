@@ -1,0 +1,13 @@
+.git
+.gitignore
+Jenkinsfile
+README.md
+k8s/
+deploy/
+docs/
+media/
+staticfiles/
+db.sqlite3
+**/__pycache__
+**/*.pyc
+.env

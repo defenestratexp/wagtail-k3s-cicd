@@ -1,0 +1,288 @@
+{% extends "base.html" %}
+{% load wagtailcore_tags %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <h1 class="section-title">{{ page.title }}</h1>
+        {% if page.intro %}
+        <div class="section-subtitle">
+            {{ page.intro|richtext }}
+        </div>
+        {% endif %}
+
+        <div class="contact-grid">
+            <!-- Calendly Embed -->
+            {% if page.calendly_url %}
+            <div class="calendly-section">
+                <h2 class="contact-heading">
+                    <i class="fas fa-calendar-check"></i> {{ page.calendly_text }}
+                </h2>
+                <div class="calendly-inline-widget" data-url="{{ page.calendly_url }}?hide_gdpr_banner=1&background_color=1e293b&text_color=f8fafc&primary_color=0ea5e9" style="min-width:0;width:100%;height:700px;"></div>
+                <script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async></script>
+            </div>
+            {% endif %}
+
+            <!-- Contact Info -->
+            <div class="contact-info">
+                <h2 class="contact-heading">
+                    <i class="fas fa-envelope"></i> Get in Touch
+                </h2>
+                <div class="contact-card">
+                    {% if page.email %}
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div class="contact-details">
+                            <span class="contact-label">Email</span>
+                            <a href="mailto:{{ page.email }}">{{ page.email }}</a>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fab fa-linkedin"></i>
+                        </div>
+                        <div class="contact-details">
+                            <span class="contact-label">LinkedIn</span>
+                            <a href="https://www.linkedin.com/in/troycthompson/" target="_blank" rel="noopener">linkedin.com/in/troycthompson</a>
+                        </div>
+                    </div>
+
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fab fa-github"></i>
+                        </div>
+                        <div class="contact-details">
+                            <span class="contact-label">GitHub</span>
+                            <a href="https://github.com/defenestratexp" target="_blank" rel="noopener">github.com/defenestratexp</a>
+                        </div>
+                    </div>
+
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div class="contact-details">
+                            <span class="contact-label">Location</span>
+                            <span>Oakland, CA (Remote Available)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="availability-card">
+                    <h3><i class="fas fa-clock"></i> Availability</h3>
+                    <p>Currently open to:</p>
+                    <ul>
+                        <li><i class="fas fa-check"></i> Full-time opportunities</li>
+                        <li><i class="fas fa-check"></i> Contract engagements</li>
+                        <li><i class="fas fa-check"></i> Consulting projects</li>
+                    </ul>
+                </div>
+
+                <div class="response-note">
+                    <i class="fas fa-bolt"></i>
+                    <span>Typical response time: Within 24 hours</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% block extra_css %}
+<style>
+.contact-grid {
+    display: grid;
+    /* minmax(0, ...) plus the min-width:0 rules below let these columns shrink
+       on phones; otherwise the Calendly widget and the long email address hold
+       the page wider than the screen. */
+    grid-template-columns: minmax(0, 1fr) minmax(0, 400px);
+    gap: 3rem;
+    align-items: start;
+}
+
+.calendly-section,
+.contact-info,
+.contact-card,
+.contact-item {
+    min-width: 0;
+}
+
+/* Long addresses and URLs must be allowed to break. */
+.contact-details,
+.contact-details a,
+.contact-details span {
+    overflow-wrap: anywhere;
+}
+
+.contact-heading {
+    color: var(--white);
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.contact-heading i {
+    color: var(--primary-light);
+}
+
+.calendly-section {
+    background: var(--dark-lighter);
+    border-radius: 12px;
+    padding: 2rem;
+    border: 1px solid var(--gray-800);
+}
+
+.contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.contact-card {
+    background: var(--dark-lighter);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid var(--gray-800);
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--gray-800);
+}
+
+.contact-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.contact-item:first-child {
+    padding-top: 0;
+}
+
+.contact-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--gray-800);
+    border-radius: 10px;
+    color: var(--primary-light);
+    font-size: 1.25rem;
+}
+
+.contact-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.contact-label {
+    font-size: 0.75rem;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.25rem;
+}
+
+.contact-details a, .contact-details span {
+    color: var(--gray-300);
+    font-size: 0.95rem;
+}
+
+.contact-details a:hover {
+    color: var(--primary-light);
+}
+
+.availability-card {
+    background: var(--dark-lighter);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid var(--gray-800);
+}
+
+.availability-card h3 {
+    color: var(--white);
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.availability-card h3 i {
+    color: var(--accent);
+}
+
+.availability-card p {
+    color: var(--gray-500);
+    margin-bottom: 0.75rem;
+}
+
+.availability-card ul {
+    list-style: none;
+    padding: 0;
+}
+
+.availability-card li {
+    color: var(--gray-400);
+    padding: 0.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.availability-card li i {
+    color: var(--accent);
+    font-size: 0.875rem;
+}
+
+.response-note {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    background: rgba(14, 165, 233, 0.1);
+    border-radius: 8px;
+    border: 1px solid rgba(14, 165, 233, 0.3);
+}
+
+.response-note i {
+    color: var(--primary-light);
+}
+
+.response-note span {
+    color: var(--gray-400);
+    font-size: 0.9rem;
+}
+
+/* Calendly widget dark mode adjustments */
+.calendly-inline-widget {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+@media (max-width: 900px) {
+    .contact-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .calendly-section {
+        order: 2;
+    }
+
+    .contact-info {
+        order: 1;
+    }
+}
+</style>
+{% endblock %}
+{% endblock %}

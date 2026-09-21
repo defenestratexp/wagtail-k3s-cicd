@@ -1,0 +1,100 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: wagtail-media-pvc
+  namespace: resume-site
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: wagtail-config
+  namespace: resume-site
+data:
+  DJANGO_SETTINGS_MODULE: resume_site.settings.production
+  POSTGRES_HOST: postgres
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB: resume_site
+  POSTGRES_USER: wagtail
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wagtail
+  namespace: resume-site
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wagtail
+  template:
+    metadata:
+      labels:
+        app: wagtail
+    spec:
+      imagePullSecrets:
+        - name: ecr-registry
+      initContainers:
+        - name: migrate
+          image: 123456789012.dkr.ecr.us-west-2.amazonaws.com/homelab/wagtail-resume:latest
+          command: ["python", "manage.py", "migrate", "--noinput"]
+          envFrom:
+            - configMapRef:
+                name: wagtail-config
+            - secretRef:
+                name: wagtail-secret
+      containers:
+        - name: wagtail
+          image: 123456789012.dkr.ecr.us-west-2.amazonaws.com/homelab/wagtail-resume:latest
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: wagtail-config
+            - secretRef:
+                name: wagtail-secret
+          volumeMounts:
+            - name: media-storage
+              mountPath: /app/media
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          readinessProbe:
+            httpGet:
+              path: /admin/login/
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /admin/login/
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+      volumes:
+        - name: media-storage
+          persistentVolumeClaim:
+            claimName: wagtail-media-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wagtail
+  namespace: resume-site
+spec:
+  selector:
+    app: wagtail
+  ports:
+    - port: 80
+      targetPort: 8000
