@@ -12,25 +12,7 @@ placeholders.
 
 ## Architecture
 
-```mermaid
-flowchart LR
-    dev[git push] --> jenkins[Jenkins<br/>wagtail-resume-build]
-    jenkins -->|docker build| img[(image :BUILD_NUMBER + :latest)]
-    img -->|docker push| ecr[(Amazon ECR<br/>homelab/wagtail-resume)]
-    jenkins -->|build job homelab-k8s<br/>ACTION=refresh-ecr| pull[ecr-registry<br/>imagePullSecret]
-    jenkins -->|build job homelab-k8s<br/>ACTION=restart| k3s
-
-    subgraph droplet[DigitalOcean droplet]
-      nginx[nginx + certbot<br/>TLS termination] --> k3s
-      subgraph k3s[K3s · namespace resume-site]
-        init[initContainer<br/>manage.py migrate] --> web[wagtail<br/>gunicorn :8000]
-        web --> pg[(postgres:16-alpine<br/>PVC)]
-        web --> media[(media PVC)]
-      end
-    end
-    ecr --> k3s
-    user((visitor)) -->|HTTPS| nginx
-```
+![Pipeline: Jenkins builds and pushes to ECR, then a downstream job refreshes the pull secret and restarts the deployment on K3s behind host nginx](docs/diagrams/pipeline.png)
 
 ## Content model
 

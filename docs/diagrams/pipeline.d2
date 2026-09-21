@@ -1,0 +1,42 @@
+direction: down
+
+dev: "git push"
+
+jenkins: "Jenkins" {
+  direction: down
+  build: "wagtail-resume-build\n(agent label ansible)\ndocker build, tag :BUILD_NUMBER + :latest"
+  k8s: "homelab-k8s job\n(runs on another node)"
+  build -> k8s: "1. ACTION=refresh-ecr\n2. ACTION=restart"
+}
+
+ecr: "Amazon ECR\nhomelab/wagtail-resume" {shape: cylinder}
+
+droplet: "DigitalOcean droplet" {
+  direction: down
+  nginx: "host nginx + certbot\n(Let's Encrypt, TLS termination)"
+  k3s: "K3s, namespace resume-site" {
+    direction: down
+    secret: "ecr-registry\nimagePullSecret"
+    pod: "wagtail pod" {
+      direction: down
+      init: "init container\nmanage.py migrate"
+      web: "gunicorn :8000\n(WhiteNoise static)"
+      init -> web: "then"
+    }
+    pg: "postgres:16-alpine\n(PVC)" {shape: cylinder}
+    media: "media PVC" {shape: cylinder}
+    pod.init -> pg
+    pod.web -> pg
+    pod.web -> media
+  }
+  nginx -> k3s.pod.web: "proxy_pass (NodePort)"
+}
+
+visitor: "visitor" {shape: person}
+
+dev -> jenkins.build
+jenkins.build -> ecr: "docker push"
+jenkins.k8s -> droplet.k3s.secret: "renew token"
+jenkins.k8s -> droplet.k3s.pod: "rollout restart"
+ecr -> droplet.k3s.pod: "pull :latest"
+visitor -> droplet.nginx: "HTTPS"
